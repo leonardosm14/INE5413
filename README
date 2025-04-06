@@ -1,3 +1,3 @@
-A pasta "Grafos - Tipos" contém a classe principal para a instância de grafos (dirigos e não dirigidos);
+A pasta "Grafos - Tipos" contém a classe principal para a instância de grafos (dirigidos e não dirigidos);
 A pasta "Algoritmos" possui os algoritmos de busca (BFS e DFS), de Hierholzer e demais;
 Todos arquivos possuem uma função "main" para realizar os testes, tal que os exercutáveis estão na pasta /Algoritmos/exe.
