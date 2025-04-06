@@ -140,6 +140,26 @@ public:
         throw out_of_range("Índice de vértice inválido.");
     }
 
+    // função peso
+    double w(Vertice<T>* u, Vertice<T>* v) const {
+        int indexU = getIndiceDoVertice(*u);
+        int indexV = getIndiceDoVertice(*v);
+    
+        if (indexU == -1 || indexV == -1) {
+            throw invalid_argument("Vértice não encontrado.");
+        }
+    
+        Aresta* atual = vertices[indexU]->listaAdjacencia;
+        while (atual != nullptr) {
+            if (atual->destino == indexV) {
+                return atual->peso;
+            }
+            atual = atual->proxima;
+        }
+    
+        throw runtime_error("Aresta não encontrada entre os vértices.");
+    }
+
     // Imprimir lista de adjacência
     void imprimir() const {
         cout << "G = (V, A, w)\n";

@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/Grafos - Tipos"
+                "${workspaceFolder}/Grafos - Tipos",
+                "${workspaceFolder}/Algoritmos"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
