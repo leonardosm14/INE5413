@@ -2,6 +2,7 @@
 #define GRAFO_HPP
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 struct Aresta {

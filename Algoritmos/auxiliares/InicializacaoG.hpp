@@ -12,7 +12,7 @@ pair<vector<int>, vector<Vertice<T>*>> InicializacaoG(const Grafo<T>& G, const V
     //inicialização
     int n = G.getQuantidadeVertices();
     vector<int> D(n, numeric_limits<int>::max());
-    vector<Vertice<T>*> A(n, nullptr);
+    vector<Vertice<T>*> A(n, nullptr)
     D[G.getIndiceDoVertice(s)] = 0;
     return {D, A};
 }
