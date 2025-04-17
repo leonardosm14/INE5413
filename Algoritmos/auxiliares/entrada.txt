@@ -6,4 +6,3 @@
 a b 1
 a c 2
 c b 3
-fim

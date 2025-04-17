@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -7,74 +8,71 @@
 using namespace std;
 
 template<typename T>
-Grafo<T> lerEntradaTerminal(bool direcionado = false) {
+Grafo<T> lerArquivo(ifstream& arquivo) {
     string linha;
     int quantidadeVertices = 0;
-    
-    // Primeiro pede o número de vértices
-    getline(cin, linha);
-    while (linha.find("*vertices") == string::npos) {
-        cout << "Formato inválido. Use '*vertices n': ";
-        getline(cin, linha);
+
+    // Procurar linha com "*vertices n"
+    while (getline(arquivo, linha)) {
+        if (linha.find("*vertices") != string::npos) {
+            stringstream ss(linha);
+            string token;
+            ss >> token >> quantidadeVertices;
+            break;
+        }
     }
-    
-    stringstream ss(linha);
-    string token;
-    ss >> token >> quantidadeVertices;
-    Grafo<T> grafo(quantidadeVertices, direcionado);
+
+    if (quantidadeVertices == 0) {
+        throw runtime_error("Linha '*vertices n' não encontrada ou inválida.");
+    }
+
+    // Grafo não direcionado fixo
+    Grafo<T> grafo(quantidadeVertices, false);
 
     // Ler vértices
-    cout << "\nDigite os vértices (um por linha, formato: índice rótulo):\n";
     for (int i = 0; i < quantidadeVertices; i++) {
-        while (true) {
-            cout << "Vértice " << (i+1) << ": ";
-            getline(cin, linha);
-            
-            stringstream ss_vert(linha);
-            int indice;
-            T rotulo;
-            
-            if (ss_vert >> indice >> rotulo) {
-                grafo.adicionarVertice(rotulo);
-                break;
-            }
-            cout << "Formato inválido. Use: índice rótulo\n";
+        if (!getline(arquivo, linha)) {
+            throw runtime_error("Linhas de vértices insuficientes.");
         }
+
+        stringstream ss_vert(linha);
+        int indice;
+        T rotulo;
+
+        if (!(ss_vert >> indice >> rotulo)) {
+            throw runtime_error("Formato inválido de vértice.");
+        }
+
+        grafo.adicionarVertice(rotulo);
     }
 
-    // Ler arestas
-    
-    while (true) {
-        cout << "Aresta: ";
-        getline(cin, linha);
-        
-        if (linha == "fim") break;
+    // Ler arestas (até fim do arquivo)
+    while (getline(arquivo, linha)) {
         if (linha.empty()) continue;
-        
+
         stringstream ss_aresta(linha);
         T rotuloOrigem, rotuloDestino;
-        double peso = 1.0; // Valor padrão
-        
+        double peso = 1.0;
+
         if (!(ss_aresta >> rotuloOrigem >> rotuloDestino)) {
-            cout << "Formato inválido. Use: origem destino [peso]\n";
+            cerr << "Formato inválido de aresta: " << linha << endl;
             continue;
         }
-        
+
         ss_aresta >> peso;
-        
-        // Buscar índices
+
         Vertice<T> vOrigem(rotuloOrigem);
         Vertice<T> vDestino(rotuloDestino);
-        
+
         int origem = grafo.getIndiceDoVertice(vOrigem);
         int destino = grafo.getIndiceDoVertice(vDestino);
-        
+
         if (origem == -1 || destino == -1) {
-            cout << "Erro: Vértice não encontrado (" 
+            cerr << "Erro: vértice não encontrado (" 
                  << rotuloOrigem << " ou " << rotuloDestino << ")\n";
             continue;
         }
-        
+
         grafo.adicionarAresta(origem, destino, peso);
     }
 
@@ -83,27 +81,36 @@ Grafo<T> lerEntradaTerminal(bool direcionado = false) {
 
 // TESTE
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
-        cout << "=====================================\n";
-        cout << "   LEITURA INTERATIVA DE GRAFO      \n";
-        cout << "=====================================\n\n";
-        
-        Grafo<string> g = lerEntradaTerminal<string>(false);
-        
+        if (argc < 2) {
+            cerr << "Uso: " << argv[0] << " <arquivo.txt>\n";
+            return 1;
+        }
+
+        ifstream entrada(argv[1]);
+        if (!entrada.is_open()) {
+            cerr << "Erro ao abrir o arquivo: " << argv[1] << endl;
+            return 1;
+        }
+
+        Grafo<string> g = lerArquivo<string>(entrada);
+
         cout << "\n=====================================\n";
         cout << "          GRAFO RESULTANTE           \n";
         cout << "=====================================\n\n";
-        
+
         g.imprimir();
-        
+
         cout << "\nVértices: " << g.getQuantidadeVertices() << endl;
         cout << "Arestas: " << g.getQuantidadeArestas() << endl;
-        
+
+        entrada.close();
+
     } catch (const exception& e) {
         cerr << "\nErro: " << e.what() << endl;
         return 1;
     }
-    
+
     return 0;
 }
