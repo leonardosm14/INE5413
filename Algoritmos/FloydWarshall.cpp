@@ -1,10 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <stack>
-#include <tuple>
 #include <limits>
-#include "auxiliares/InicializacaoG.hpp"
-#include "auxiliares/Relaxamento.hpp"
 #include "../Grafos - Tipos/grafo.hpp"
 
 using namespace std;
