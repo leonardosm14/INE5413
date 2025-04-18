@@ -73,12 +73,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Grafo<int> g;
+    Grafo<string> g;
     g.ler(entrada);
 
-    int rotuloOrigem = stoi(argv[2]);
+    string rotuloOrigem = argv[2];
     try {
-        map<int, vector<int>> niveis = BFS(g, rotuloOrigem);
+        map<int, vector<string>> niveis = BFS(g, rotuloOrigem);
         imprimirNiveis(niveis);
     } catch (const exception& e) {
         cerr << "Erro: " << e.what() << endl;
