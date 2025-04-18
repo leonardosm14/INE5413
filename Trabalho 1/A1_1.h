@@ -1,208 +1,164 @@
-// LEONARDO DE SOUSA MARQUES & THAYSE ESTEVO TEIXEIRA - 2025
-#ifndef GRAFO_HPP
-#define GRAFO_HPP
+#ifndef GRAFO_H
+#define GRAFO_H
 
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
 const double INF = numeric_limits<double>::infinity();
 
 template <typename T>
-struct Vertice;
+struct Vertice {
+    T rotulo;
+    vector<T> vizinhos;
 
-template <typename T>
-struct Aresta {
-    Vertice<T>* destino;
-    double peso;
-    Aresta* proxima;
-
-    Aresta(Vertice<T>* d, double p) : destino(d), peso(p), proxima(nullptr) {}
+    bool operator==(const Vertice<T>& outro) const {
+        return rotulo == outro.rotulo;
+    }
 };
 
 template <typename T>
-struct Vertice {
-    T rotulo;
-    Aresta<T>* listaAdjacencia;
-
-    Vertice(T rot) : rotulo(rot), listaAdjacencia(nullptr) {}
+struct Aresta {
+    Vertice<T> origem;
+    Vertice<T> destino;
+    double peso;
 };
 
 template <typename T>
 class Grafo {
 private:
-    vector<Vertice<T>*> vertices;
-    unordered_map<T, Vertice<T>*> mapaRotulos;
-    bool direcionado;
+    vector<Vertice<T>> vertices;
+    vector<Aresta<T>> arestas;
+
+    Vertice<T>* encontrarVertice(const T& rotulo) {
+        for (auto& v : vertices) {
+            if (v.rotulo == rotulo) return &v;
+        }
+        return nullptr;
+    }
 
 public:
-    // Construtor sem capacidade fixa
-    Grafo(bool eh_direcionado = false) : direcionado(eh_direcionado) {}
+    Grafo() = default;
 
-    // Destrutor
-    ~Grafo() {
-        for (auto vertice : vertices) {
-            Aresta<T>* atual = vertice->listaAdjacencia;
-            while (atual != nullptr) {
-                Aresta<T>* temp = atual;
-                atual = atual->proxima;
-                delete temp;
+    size_t qtdVertices() const {
+        return vertices.size();
+    }
+
+    size_t qtdArestas() const {
+        return arestas.size();
+    }
+
+    size_t grau(const Vertice<T>& v) const {
+        return v.vizinhos.size();
+    }
+
+    T& rotulo(const Vertice<T>& v) const {
+        return v.rotulo;
+    }
+
+    bool haAresta(const Vertice<T>& u, const Vertice<T>& v) const {
+        for (const Aresta<T>& a : arestas) {
+            if (a.origem == u && a.destino == v) {
+                return true;
             }
-            delete vertice;
-        }
-    }
-
-    // Métodos básicos
-    int qtdVertices() const { return vertices.size(); }
-
-    int qtdArestas() const {
-        int total = 0;
-        for (auto vertice : vertices) {
-            Aresta<T>* atual = vertice->listaAdjacencia;
-            while (atual != nullptr) {
-                total++;
-                atual = atual->proxima;
-            }
-        }
-        return direcionado ? total : total / 2;
-    }
-
-    int grau(Vertice<T>* v) const {
-        if (!pertence(v)) throw invalid_argument("Vértice não pertence ao grafo");
-        
-        int grau = 0;
-        Aresta<T>* atual = v->listaAdjacencia;
-        while (atual != nullptr) {
-            grau++;
-            atual = atual->proxima;
-        }
-        return grau;
-    }
-
-    T rotulo(Vertice<T>* v) const {
-        if (!pertence(v)) throw invalid_argument("Vértice não pertence ao grafo");
-        return v->rotulo;
-    }
-
-    vector<Vertice<T>*> vizinhos(Vertice<T>* v) const {
-        if (!pertence(v)) throw invalid_argument("Vértice não pertence ao grafo");
-        
-        vector<Vertice<T>*> vizinhos;
-        Aresta<T>* atual = v->listaAdjacencia;
-        while (atual != nullptr) {
-            vizinhos.push_back(atual->destino);
-            atual = atual->proxima;
-        }
-        return vizinhos;
-    }
-
-    bool haAresta(Vertice<T>* u, Vertice<T>* v) const {
-        if (!pertence(u) || !pertence(v)) return false;
-        
-        Aresta<T>* atual = u->listaAdjacencia;
-        while (atual != nullptr) {
-            if (atual->destino == v) return true;
-            atual = atual->proxima;
         }
         return false;
     }
 
-    double peso(Vertice<T>* u, Vertice<T>* v) const {
-        if (!pertence(u) || !pertence(v)) return INF;
-        
-        Aresta<T>* atual = u->listaAdjacencia;
-        while (atual != nullptr) {
-            if (atual->destino == v) return atual->peso;
-            atual = atual->proxima;
+    double peso(const Vertice<T>& u, const Vertice<T>& v) const {
+        for (const Aresta<T>& a : arestas) {
+            if (a.origem == u && a.destino == v) {
+                return a.peso;
+            }
         }
-        return INF;
+        return -1;
     }
 
-    // Função para ler de arquivo
-    void ler(istream& arquivo) {
+    void adicionarVertice(const T& rotulo) {
+        if (!encontrarVertice(rotulo)) {
+            Vertice<T> v;
+            v.rotulo = rotulo;
+            vertices.push_back(v);
+        }
+    }
+
+    void adicionarAresta(const T& origemRotulo, const T& destinoRotulo, double peso) {
+        Vertice<T>* origem = encontrarVertice(origemRotulo);
+        Vertice<T>* destino = encontrarVertice(destinoRotulo);
+
+        if (!origem || !destino) {
+            throw runtime_error("Vertice de origem ou destino nao encontrado.");
+        }
+
+        origem->vizinhos.push_back(destinoRotulo);
+        arestas.push_back({ *origem, *destino, peso });
+    }
+
+    const vector<Vertice<T>>& getVizinhos(const Vertice<T>& v) {
+        return v.vizinhos;
+    }
+
+    const Vertice<T>& getVertice(size_t indice) {
+        if (indice >= vertices.size()) {
+            throw out_of_range("Índice de vértice inválido.");
+        }
+        return vertices[indice];
+    }
+    
+    const Vertice<T>& getVertice(size_t indice) const {
+        if (indice >= vertices.size()) {
+            throw out_of_range("Índice de vértice inválido.");
+        }
+        return vertices[indice];
+    }
+    
+    size_t getIndiceDoVertice(const T& rotulo) const {
+        for (size_t i = 0; i < vertices.size(); ++i) {
+            if (vertices[i].rotulo == rotulo) {
+                return i;
+            }
+        }
+        throw runtime_error("Rótulo de vértice não encontrado.");
+    }
+    
+
+    void ler(ifstream& arquivo) {
         string linha;
-        
-        // Pular até a seção de vértices
+        bool lendoVertices = false, lendoArestas = false;
+
         while (getline(arquivo, linha)) {
             if (linha.empty()) continue;
-            if (linha.find("*vertices") == 0) break;
-        }
-        
-        // Ler vértices
-        while (getline(arquivo, linha)) {
-            if (linha.empty()) continue;
-            if (linha.find("*edges") == 0) break;
-            
+
+            if (linha.find("*vertices") != string::npos) {
+                lendoVertices = true;
+                lendoArestas = false;
+                continue;
+            } else if (linha.find("*edges") != string::npos) {
+                lendoVertices = false;
+                lendoArestas = true;
+                continue;
+            }
+
             stringstream ss(linha);
-            int indice;
-            T rotulo;
-            if (ss >> indice >> rotulo) {
+
+            if (lendoVertices) {
+                size_t id;
+                T rotulo;
+                ss >> id >> rotulo;
                 adicionarVertice(rotulo);
+            } else if (lendoArestas) {
+                T origem, destino;
+                double peso;
+                ss >> origem >> destino >> peso;
+                adicionarAresta(origem, destino, peso);
             }
         }
-        
-        // Ler arestas
-        while (getline(arquivo, linha)) {
-            if (linha.empty()) continue;
-            
-            stringstream ss(linha);
-            T u, v;
-            double peso = 1.0;
-            if (ss >> u >> v) {
-                ss >> peso;
-                adicionarAresta(u, v, peso);
-            }
-        }
-    }
-
-    // Métodos auxiliares
-    Vertice<T>* adicionarVertice(T rotulo) {
-        if (mapaRotulos.find(rotulo) != mapaRotulos.end()) {
-            return mapaRotulos[rotulo]; // Retorna existente se já houver
-        }
-        
-        Vertice<T>* novo = new Vertice<T>(rotulo);
-        vertices.push_back(novo);
-        mapaRotulos[rotulo] = novo;
-        return novo;
-    }
-
-    void adicionarAresta(T rotuloU, T rotuloV, double peso) {
-        Vertice<T>* u = adicionarVertice(rotuloU);
-        Vertice<T>* v = adicionarVertice(rotuloV);
-        
-        // Adiciona aresta de u para v
-        Aresta<T>* nova = new Aresta<T>(v, peso);
-        nova->proxima = u->listaAdjacencia;
-        u->listaAdjacencia = nova;
-
-        // Se não for direcionado, adiciona a aresta inversa
-        if (!direcionado && u != v) {
-            Aresta<T>* inversa = new Aresta<T>(u, peso);
-            inversa->proxima = v->listaAdjacencia;
-            v->listaAdjacencia = inversa;
-        }
-    }
-
-    vector<Vertice<T>*> getVertices() const { 
-        return vertices; 
-    }
-
-    bool pertence(Vertice<T>* v) const {
-        for (auto vertice : vertices) {
-            if (vertice == v) return true;
-        }
-        return false;
-    }
-
-    Vertice<T>* getVertice(T rotulo) const {
-        auto it = mapaRotulos.find(rotulo);
-        return it != mapaRotulos.end() ? it->second : nullptr;
     }
 
 };

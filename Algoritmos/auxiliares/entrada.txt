@@ -1,8 +1,0 @@
-*vertices 3
-1 a
-2 b
-3 c
-*edges
-a b 1
-a c 2
-c b 3
