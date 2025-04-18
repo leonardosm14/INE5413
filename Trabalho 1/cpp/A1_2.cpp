@@ -8,49 +8,44 @@
 
 using namespace std;
 
-template <typename T>
-map<int, vector<T>> BFS(const Grafo<T>& G, const T& rotuloOrigem) {
+map<int, vector<string>> BFS(const Grafo<string>& G, size_t indiceOrigem) {
     size_t n = G.qtdVertices();
     vector<bool> visitado(n, false);
     vector<int> nivel(n, -1);
     queue<size_t> fila;
 
-    // Obter índice do vértice de origem
-    size_t origem = G.getIndiceDoVertice(rotuloOrigem);
+    if (indiceOrigem >= n) {
+        throw out_of_range("Índice de vértice inválido.");
+    }
 
-    visitado[origem] = true;
-    nivel[origem] = 0;
-    fila.push(origem);
+    visitado[indiceOrigem] = true;
+    nivel[indiceOrigem] = 0;
+    fila.push(indiceOrigem);
 
     while (!fila.empty()) {
         size_t u = fila.front();
         fila.pop();
         
-        // Obter vizinhos do vértice u
-        const Vertice<T>& verticeU = G.getVertice(u);
-        for (const T& rotuloVizinho : verticeU.vizinhos) {
-            size_t v = G.getIndiceDoVertice(rotuloVizinho);
-            if (!visitado[v]) {
-                visitado[v] = true;
-                nivel[v] = nivel[u] + 1;
-                fila.push(v);
+        const Vertice<string>& verticeU = G.getVertice(u);
+        for (size_t indiceVizinho : verticeU.vizinhos) {
+            if (!visitado[indiceVizinho]) {
+                visitado[indiceVizinho] = true;
+                nivel[indiceVizinho] = nivel[u] + 1;
+                fila.push(indiceVizinho);
             }
         }
     }
 
-    // Agrupar vértices por nível
-    map<int, vector<T>> niveis;
+    map<int, vector<string>> niveis;
     for (size_t i = 0; i < n; ++i) {
         if (nivel[i] != -1) {
             niveis[nivel[i]].push_back(G.getVertice(i).rotulo);
         }
     }
-
     return niveis;
 }
 
-template <typename T>
-void imprimirNiveis(const map<int, vector<T>>& niveis) {
+void imprimirNiveis(const map<int, vector<string>>& niveis) {
     for (const auto& par : niveis) {
         cout << par.first << ": ";
         for (size_t i = 0; i < par.second.size(); ++i) {
@@ -63,7 +58,7 @@ void imprimirNiveis(const map<int, vector<T>>& niveis) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        cerr << "Uso: " << argv[0] << " <arquivo_entrada> <vertice_origem>" << endl;
+        cerr << "Uso: " << argv[0] << " <arquivo_entrada> <indice_vertice_origem>" << endl;
         return 1;
     }
 
@@ -74,12 +69,16 @@ int main(int argc, char* argv[]) {
     }
 
     Grafo<string> g;
-    g.ler(entrada);
-
-    string rotuloOrigem = argv[2];
     try {
-        map<int, vector<string>> niveis = BFS(g, rotuloOrigem);
+        g.ler(entrada);
+        
+        size_t indiceOrigem = stoul(argv[2]);
+        map<int, vector<string>> niveis = BFS(g, indiceOrigem);
+        
+        cout << "BFS iniciado no vértice [" << indiceOrigem << "]: " 
+             << g.getVertice(indiceOrigem).rotulo << endl;
         imprimirNiveis(niveis);
+
     } catch (const exception& e) {
         cerr << "Erro: " << e.what() << endl;
         return 1;
