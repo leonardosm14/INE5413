@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
-import re, sys, argparse
-from typing import List
+import sys, argparse
+from typing import List, Dict
 
 @dataclass
 class Vertice:
+    indice: int
     rotulo: str
     vizinhos: List['Vertice'] = field(default_factory=list)
 
@@ -17,12 +18,19 @@ class Aresta:
 class Grafo:
     vertices: List[Vertice] = field(default_factory=list)
     arestas: List[Aresta] = field(default_factory=list)
+    indice_para_vertice: Dict[int, Vertice] = field(default_factory=dict)
 
     def qtdVertices(self) -> int:
         return len(self.vertices)
 
     def qtdArestas(self) -> int:
         return len(self.arestas)
+
+    def getVertices(self) -> List[Vertice]:
+        return self.vertices
+    
+    def getArestas(self) -> List[Aresta]:
+        return self.arestas
 
     def grau(self, v: Vertice) -> int:
         return len(v.vizinhos)
@@ -35,76 +43,88 @@ class Grafo:
 
     def haAresta(self, u: Vertice, v: Vertice) -> bool:
         for a in self.arestas:
-            if a.origem == u and a.destino == v:
+            if (a.origem == u and a.destino == v) or (a.origem == v and a.destino == u):
                 return True
         return False
 
     def peso(self, u: Vertice, v: Vertice) -> float:
         for a in self.arestas:
-            if a.origem == u and a.destino == v:
+            if (a.origem == u and a.destino == v) or (a.origem == v and a.destinso == u):
                 return a.peso
-        return -1
+        return float('inf')
 
-    def adicionarVertice(self, rotulo: str) -> Vertice:
-        novo_vertice = Vertice(rotulo=rotulo)
+    def getIndiceVertice(self, v: Vertice) -> int:
+        return v.indice
+
+    def adicionarVertice(self, indice: int, rotulo: str) -> Vertice:
+        novo_vertice = Vertice(indice=indice, rotulo=rotulo)
         self.vertices.append(novo_vertice)
+        self.indice_para_vertice[indice] = novo_vertice
         return novo_vertice
 
     def adicionarAresta(self, origem: Vertice, destino: Vertice, peso: float) -> Aresta:
         nova_aresta = Aresta(origem=origem, destino=destino, peso=peso)
         self.arestas.append(nova_aresta)
         origem.vizinhos.append(destino)
+        destino.vizinhos.append(origem)
         return nova_aresta
 
-    def buscarVertice(self, rotulo: str) -> Vertice | None:
-        for v in self.vertices:
-            if v.rotulo == rotulo:
-                return v
-        return None
+    def buscarVerticePorIndice(self, indice: int) -> Vertice | None:
+        return self.indice_para_vertice.get(indice)
     
     def ler(self, caminho_arquivo: str):
+        """Lê arquivo no formato .net assumindo formato fixo"""
         with open(caminho_arquivo, 'r') as f:
             linhas = [linha.strip() for linha in f if linha.strip() and not linha.startswith('#')]
-
-        modo = None
-        for linha in linhas:
-            if linha.lower().startswith("*vertices"):
-                modo = "vertices"
-                continue
-            elif linha.lower().startswith("*edges"):
-                modo = "arestas"
-                continue
-
-            if modo == "vertices":
-                match = re.match(r'^\d+\s+(?:"(.+?)"|(\S+))', linha)
-                rotulo = match.group(1) or match.group(2)
-                self.adicionarVertice(rotulo=rotulo)
-            elif modo == "arestas":
-                match = re.match(r'(?:"(.+?)"|(\S+))\s+(?:"(.+?)"|(\S+))\s+([\d.]+)', linha)
-                if match:
-                    rot1 = match.group(1) or match.group(2)
-                    rot2 = match.group(3) or match.group(4)
-                    peso = float(match.group(5))
-                    self.adicionarAresta(origem=self.buscarVertice(rotulo=rot1), destino=self.buscarVertice(rotulo=rot2), peso=peso)
-
-    def buscarVertice(self, rotulo: str):
-        for v in self.vertices:
-            if v.rotulo == rotulo:
-                return v
-        return None
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("arquivo", type=str, help="Arquivo de entrada") 
-    args = parser.parse_args()
-
-    grafo = Grafo()
-    grafo.ler(args.arquivo)
-
-    print(f"Vértices ({grafo.qtdVertices()}): {[v.rotulo for v in grafo.vertices]}")
-    print(f"Arestas ({grafo.qtdArestas()}):")
-    for a in grafo.arestas:
-        print(f"  {a.origem.rotulo} -> {a.destino.rotulo} (peso={a.peso})")
-
-if __name__ == '__main__':
-    main()
+        
+        if not linhas:
+            raise ValueError("Arquivo vazio ou contém apenas comentários")
+        
+        # Processa vértices
+        vertices_linha = linhas[0]
+        if not vertices_linha.lower().startswith("*vertices"):
+            raise ValueError("Formato inválido: arquivo deve começar com *vertices")
+        
+        # Descarta o número após *vertices (não é necessário pois os vértices vêm nas linhas seguintes)
+        vertices_data = linhas[1:]  # Pega todas as linhas após *vertices
+        
+        # Encontra onde começam as arestas
+        edges_index = next((i for i, linha in enumerate(vertices_data) 
+                        if linha.lower().startswith("*edges")), None)
+        
+        if edges_index is None:
+            # Processa todos os vértices (quando não há arestas)
+            vertices_lines = vertices_data
+        else:
+            # Processa vértices até a linha antes de *edges
+            vertices_lines = vertices_data[:edges_index]
+        
+        for linha in vertices_lines:
+            try:
+                partes = linha.split(maxsplit=1)  # Divide apenas no primeiro espaço
+                indice = int(partes[0])
+                rotulo = partes[1].strip('"') if len(partes) > 1 else ""
+                self.adicionarVertice(indice, rotulo)
+            except (IndexError, ValueError) as e:
+                raise ValueError(f"Erro ao processar vértice: '{linha}': {e}")
+        
+        # Processa arestas se existirem
+        if edges_index is not None:
+            for linha in vertices_data[edges_index+1:]:
+                try:
+                    partes = linha.split()
+                    origem_idx = int(partes[0])
+                    destino_idx = int(partes[1])
+                    peso = float(partes[2]) if len(partes) > 2 else 1.0
+                    
+                    v_origem = self.buscarVerticePorIndice(origem_idx)
+                    v_destino = self.buscarVerticePorIndice(destino_idx)
+                    
+                    if v_origem is None:
+                        raise ValueError(f"Vértice de origem {origem_idx} não encontrado")
+                    if v_destino is None:
+                        raise ValueError(f"Vértice de destino {destino_idx} não encontrado")
+                    
+                    self.adicionarAresta(v_origem, v_destino, peso)
+                except (IndexError, ValueError) as e:
+                    raise ValueError(f"Erro ao processar aresta: '{linha}': {e}")
