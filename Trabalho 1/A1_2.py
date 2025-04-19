@@ -16,7 +16,7 @@ def BFS(G: Grafo, indice_origem: int):
         u = fila.pop(0)
         vertice_u = G.buscarVerticePorIndice(u+1)
         for vizinho in vertice_u.vizinhos:
-            v = G.getIndiceVertice(vizinho)-1
+            v =  vizinho.indice-1
             if not visitado[v]:
                 visitado[v] = True
                 nivel[v] = nivel[u] + 1

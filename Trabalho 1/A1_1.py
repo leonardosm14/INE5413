@@ -52,9 +52,6 @@ class Grafo:
                 return a.peso
         return float('inf')
 
-    def getIndiceVertice(self, v: Vertice) -> int:
-        return v.indice
-
     def adicionarVertice(self, indice: int, rotulo: str) -> Vertice:
         novo_vertice = Vertice(indice=indice, rotulo=rotulo)
         self.vertices.append(novo_vertice)
