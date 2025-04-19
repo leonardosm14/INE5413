@@ -1,5 +1,5 @@
 from typing import List
-from A1_1 import Grafo, Aresta
+from A1_1 import Grafo
 import sys
 
 INF = float('inf')

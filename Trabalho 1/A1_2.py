@@ -1,11 +1,9 @@
-import argparse
 import sys
-from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
-from A1_1 import Grafo, Vertice, Aresta
+from A1_1 import Grafo
 
-def BFS(grafo, indice_origem):
-    n = grafo.qtdVertices()
+def BFS(G: Grafo, indice_origem: int):
+    n = G.qtdVertices()
     visitado = [False] * n
     nivel = [-1] * n
     fila = []
@@ -16,9 +14,9 @@ def BFS(grafo, indice_origem):
 
     while fila:
         u = fila.pop(0)
-        vertice_u = grafo.buscarVerticePorIndice(u+1)
+        vertice_u = G.buscarVerticePorIndice(u+1)
         for vizinho in vertice_u.vizinhos:
-            v = grafo.getIndiceVertice(vizinho)-1
+            v = G.getIndiceVertice(vizinho)-1
             if not visitado[v]:
                 visitado[v] = True
                 nivel[v] = nivel[u] + 1

@@ -1,7 +1,7 @@
 import sys
 from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
-from A1_1 import Grafo, Vertice, Aresta
+from A1_1 import Grafo, Vertice
 
 def Hierholzer(G: Grafo) -> Tuple[bool, Optional[List[str]]]:
     if G.qtdArestas() == 0:

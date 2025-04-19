@@ -1,16 +1,14 @@
 import sys
-from typing import List, Tuple, Optional, Dict
-from collections import defaultdict
-from A1_1 import Grafo, Vertice, Aresta
+from A1_1 import Grafo
 
 INF = float('inf')
 
-def floyd_warshall(grafo):
-    n = grafo.qtdVertices()
+def floyd_warshall(G: Grafo):
+    n = G.qtdVertices()
 
     D = [[INF] * n for _ in range(n)]
 
-    for u in grafo.getArestas():
+    for u in G.getArestas():
             D[u.origem.indice-1][u.destino.indice-1] = int(u.peso)
             D[u.destino.indice-1][u.origem.indice-1] = int(u.peso)
 
