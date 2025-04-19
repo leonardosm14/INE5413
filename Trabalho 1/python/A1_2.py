@@ -1,4 +1,3 @@
-from collections import deque, defaultdict
 import argparse
 from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
@@ -8,14 +7,14 @@ def BFS(grafo, indice_origem):
     n = grafo.qtdVertices()
     visitado = [False] * n
     nivel = [-1] * n
-    fila = deque()
+    fila = []
 
     visitado[indice_origem] = True
     nivel[indice_origem] = 0
     fila.append(indice_origem)
 
     while fila:
-        u = fila.popleft()
+        u = fila.pop(0)
         vertice_u = grafo.buscarVerticePorIndice(u+1)
         for vizinho in vertice_u.vizinhos:
             v = grafo.getIndiceVertice(vizinho)-1
