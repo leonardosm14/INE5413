@@ -1,4 +1,5 @@
 import argparse
+import sys
 from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
 from A1_1 import Grafo, Vertice, Aresta
@@ -37,8 +38,6 @@ def imprimir_niveis(niveis):
 
 
 if __name__ == "__main__":
-    import sys
-
     if len(sys.argv) != 3:
         print(f"Uso: {sys.argv[0]} <arquivo_entrada> <vertice_origem>")
         sys.exit(1)

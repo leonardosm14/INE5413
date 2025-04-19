@@ -1,4 +1,4 @@
-import argparse
+import sys
 from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
 from A1_1 import Grafo, Vertice, Aresta
@@ -88,22 +88,30 @@ def buscar_subciclo(G: Grafo, v: Vertice, C: Dict[Tuple[str, str], int]) -> Tupl
     return (True, Ciclo)
 
 def main():
-    parser = argparse.ArgumentParser(description="Implementação do algoritmo de Hierholzer para ciclo euleriano")
-    parser.add_argument("arquivo", help="Arquivo de entrada no formato especificado")
-    args = parser.parse_args()
+    if len(sys.argv) != 2:
+        print(f"Uso: {sys.argv[0]} <arquivo_grafo>")
+        sys.exit(1)
 
-    grafo = Grafo()
-    grafo.ler(args.arquivo)
+    try:
+        grafo = Grafo()
+        grafo.ler(sys.argv[1])  # Lê o arquivo do grafo
 
+        resultado, ciclo = Hierholzer(grafo)
         
-    r, ciclo = Hierholzer(grafo)
-    if not r:
-        print(0)
-    else:
-        rotulo_para_indice = {v.rotulo: str(v.indice) for v in grafo.vertices}
-        caminho_indices = [rotulo_para_indice[r] for r in ciclo]
-        print("1\n" + ",".join(caminho_indices))
-    
+        if not resultado:
+            print(0)
+        else:
+            # Converte rótulos para índices
+            rotulo_para_indice = {v.rotulo: str(v.indice) for v in grafo.vertices}
+            caminho_indices = [rotulo_para_indice[r] for r in ciclo]
+            print("1\n" + ",".join(caminho_indices))
 
-if __name__ == '__main__':
+    except FileNotFoundError:
+        print(f"Erro: Arquivo '{sys.argv[1]}' não encontrado")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Erro: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
     main()

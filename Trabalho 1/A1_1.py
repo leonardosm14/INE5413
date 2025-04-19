@@ -49,7 +49,7 @@ class Grafo:
 
     def peso(self, u: Vertice, v: Vertice) -> float:
         for a in self.arestas:
-            if (a.origem == u and a.destino == v) or (a.origem == v and a.destinso == u):
+            if (a.origem == u and a.destino == v) or (a.origem == v and a.destino == u):
                 return a.peso
         return float('inf')
 
