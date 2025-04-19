@@ -9,8 +9,8 @@ def floyd_warshall(G: Grafo):
     D = [[INF] * n for _ in range(n)]
 
     for u in G.getArestas():
-            D[u.origem.indice-1][u.destino.indice-1] = int(u.peso)
-            D[u.destino.indice-1][u.origem.indice-1] = int(u.peso)
+            D[u.origem.indice-1][u.destino.indice-1] = u.peso
+            D[u.destino.indice-1][u.origem.indice-1] = u.peso
 
     # Algoritmo de Floyd-Warshall
     for k in range(n):
