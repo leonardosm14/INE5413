@@ -6,12 +6,18 @@ class Vertice:
     indice: int
     rotulo: str
     vizinhos: List['Vertice'] = field(default_factory=list)
+    
+    def __eq__(self, other):
+        return isinstance(other, Vertice) and self.indice == other.indice
+
+    def __hash__(self):
+        return hash(self.indice)
 
 @dataclass
 class Aresta:
     origem: Vertice
     destino: Vertice
-    peso: float = None
+    peso: float = 1
 
 @dataclass
 class Grafo:
@@ -59,7 +65,7 @@ class Grafo:
         self.indice_para_vertice[indice] = novo_vertice
         return novo_vertice
 
-    def adicionarAresta(self, origem: Vertice, destino: Vertice, peso: float = 1) -> Aresta:
+    def adicionarAresta(self, origem: Vertice, destino: Vertice, peso: float = 1.0) -> Aresta:
         nova_aresta = Aresta(origem=origem, destino=destino, peso=peso)
         self.arestas.append(nova_aresta)
         origem.vizinhos.append(destino)
