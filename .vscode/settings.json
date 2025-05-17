@@ -47,5 +47,16 @@
         "typeinfo": "cpp",
         "fstream": "cpp",
         "sstream": "cpp"
+    },
+    "python.analysis.extraPaths": [
+        "./Grafos"
+    ],
+
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
     }
+
 }
