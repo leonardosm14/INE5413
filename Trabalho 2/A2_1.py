@@ -1,32 +1,37 @@
 from grafo import Grafo, Vertice, Aresta
 import sys
-from math import inf
 
-def DFS(G: Grafo):
-    n = G.qtdVertices()
-    C = [False] * n      # visitados
-    T = [inf] * n        # tempo inicial
-    F = [inf] * n        # tempo final
-    A = [None] * n       # antecessores
-    tempo = [0]
-
-    def DFS_visit(u):
-        C[u] = True
+def DFS_visit(G, u, C, A=None, T=None, F=None, tempo=None, comp=None):
+    C[u] = True
+    if tempo is not None and T is not None:
         tempo[0] += 1
         T[u] = tempo[0]
-        v = G.buscarVerticePorIndice(u)
 
-        for w in G.vizinhos(v):
-            if not C[w.indice]:
+    if comp is not None:
+        comp.append(str(u + 1))
+
+    v = G.buscarVerticePorIndice(u)
+    for w in G.vizinhos(v):
+        if not C[w.indice]:
+            if A is not None:
                 A[w.indice] = u
-                DFS_visit(w.indice)
+            DFS_visit(G, w.indice, C, A, T, F, tempo, comp)
 
+    if tempo is not None and F is not None:
         tempo[0] += 1
         F[u] = tempo[0]
 
+def DFS(G: Grafo):
+    n = G.qtdVertices()
+    C = [False] * n
+    T = [float('inf')] * n
+    F = [float('inf')] * n
+    A = [None] * n
+    tempo = [0]
+
     for v in G.vertices:
         if not C[v.indice]:
-            DFS_visit(v.indice)
+            DFS_visit(G, v.indice, C, A, T, F, tempo)
 
     return F, A
 
@@ -34,23 +39,12 @@ def DFS_adaptado(G: Grafo, ordem):
     n = G.qtdVertices()
     C = [False] * n
     A = [None] * n
-
     componentes = []
-
-    def DFS_visit(u, comp):
-        C[u] = True
-        comp.append(str(u + 1))
-        v = G.buscarVerticePorIndice(u)
-
-        for w in G.vizinhos(v):
-            if not C[w.indice]:
-                A[w.indice] = u
-                DFS_visit(w.indice, comp)
 
     for v in ordem:
         if not C[v.indice]:
             comp = []
-            DFS_visit(v.indice, comp)
+            DFS_visit(G, v.indice, C, A, comp=comp)
             componentes.append(comp)
 
     return componentes
