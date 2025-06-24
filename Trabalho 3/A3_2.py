@@ -2,7 +2,6 @@ import queue, sys
 from typing import Dict
 from grafo import Grafo, Vertice
 
-# Inicializa a variável global null como um vértice especial
 null = Vertice(indice=-1, rotulo="null", vizinhos=[])
 
 def HopcroftKarp(G: Grafo):
@@ -68,14 +67,13 @@ def main():
         
         m, mate = HopcroftKarp(G)
         print(m)
-    
+        
         # Formata as arestas do emparelhamento máximo
         arestas_emparelhamento = []
         for x in G.getX():
             if mate[x] != null:
                 arestas_emparelhamento.append(f"{x.rotulo}-{mate[x].rotulo}")
         
-        # Imprime as arestas no formato solicitado
         print(", ".join(arestas_emparelhamento))
     
     except FileNotFoundError:
