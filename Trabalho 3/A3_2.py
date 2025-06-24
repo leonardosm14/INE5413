@@ -69,12 +69,7 @@ def main():
         print(m)
         
         # Formata as arestas do emparelhamento máximo
-        arestas_emparelhamento = []
-        for x in G.getX():
-            if mate[x] != null:
-                arestas_emparelhamento.append(f"{x.rotulo}-{mate[x].rotulo}")
-        
-        print(", ".join(arestas_emparelhamento))
+        print(", ".join(f"{x.rotulo}-{mate[x].rotulo}" for x in G.getX() if mate[x] != null))
     
     except FileNotFoundError:
         print(f"Erro: Arquivo '{sys.argv[1]}' não encontrado", file=sys.stderr)
