@@ -37,6 +37,11 @@ class Grafo:
                 return v
         return None
 
+    def atualizarPeso(self, v: Vertice, u: Vertice, peso: float):
+        for aresta in self.arestas:
+            if v==aresta.origem and u==aresta.destino:
+                aresta.peso = peso
+
     def qtdVertices(self) -> int:
         return len(self.vertices)
 
@@ -90,6 +95,7 @@ class Grafo:
         return nova_aresta
 
     def buscarVerticePorIndice(self, indice: int) -> Vertice | None:
+        indice = indice-1
         return self.indice_para_vertice.get(indice)
     
     def ler(self, caminho_arquivo: str):
@@ -129,8 +135,8 @@ class Grafo:
         if edges_index is not None:
             for linha in vertices_data[edges_index + 1:]:
                 partes = linha.split()
-                origem_idx = int(partes[0]) - 1
-                destino_idx = int(partes[1]) - 1
+                origem_idx = int(partes[0])
+                destino_idx = int(partes[1])
                 peso = float(partes[2]) if len(partes) > 2 else 1.0
                 
                 origem = self.buscarVerticePorIndice(origem_idx)
