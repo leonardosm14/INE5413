@@ -49,8 +49,13 @@ class Grafo:
 
     def peso(self, u: Vertice, v: Vertice) -> float:
         for a in self.arestas:
-            if (a.origem == u and a.destino == v) or (a.origem == v and a.destino == u):
-                return a.peso
+            if self.dirigido:
+                if (a.origem == u and a.destino == v):
+                    return a.peso
+            else:
+                if (a.origem == u and a.destino == v) or (a.origem == v and a.destino == u):
+                    return a.peso
+                
         return float('inf')
 
     def adicionarVertice(self, indice: int, rotulo: str) -> Vertice:
